@@ -39,7 +39,7 @@ jobs:
       run:  go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
     - name: Run golangci-lint
-      run: golangci-lint run ./...
+      run: golangci-lint run ./... --timeout 5m --concurrency 4
     
     - name: Format code
       run: go fmt ./...
