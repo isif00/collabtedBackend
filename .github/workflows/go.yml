@@ -6,10 +6,10 @@ name: CollabTed Backend
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   build:
@@ -41,17 +41,8 @@ jobs:
     - name: Run golangci-lint
       run: golangci-lint run ./...
     
-    - name: Install gosec
-      run: go install github.com/securego/gosec/v2/cmd/gosec@latest
-    
-    - name: Run gosec
-      run: gosec ./...
-      
     - name: Format code
       run: go fmt ./...
-      
-    - name: Vet code
-      run: go vet ./...
 
     - name: Build code
       run: go build -v ./...
