@@ -41,6 +41,9 @@ func (s *LiveBoardService) CreateBoard(data types.LiveBoardD) (*db.LiveBoardMode
 				db.UserWorkspace.ID.Equals(usr.ID),
 			),
 		).Exec(context.Background())
+		if err != nil {
+			return nil, err
+		}
 
 	}
 	return result, nil

@@ -2,10 +2,11 @@ package utils
 
 import (
 	"bytes"
+	"crypto/rand"
 	"encoding/base64"
 	"fmt"
 	"io"
-	"math/rand"
+	hex "math/rand"
 	"net/http"
 
 	"github.com/CollabTED/CollabTed-Backend/pkg/types"
@@ -34,7 +35,7 @@ func GenerateUniqueName(name string, existingUsers []types.UserWorkspace) string
 
 func RandomHexColor() string {
 	// #nosec G404
-	return fmt.Sprintf("#%06x", rand.Intn(0xFFFFFF+1))
+	return fmt.Sprintf("#%06x", hex.Intn(0xFFFFFF+1))
 }
 
 // FetchAndEncodeImageToBase64 fetches an image from a URL and encodes it to Base64

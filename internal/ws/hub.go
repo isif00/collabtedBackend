@@ -32,11 +32,11 @@ const (
 )
 
 type Connection struct {
-	msgType     MessageType
-	conn        *websocket.Conn
-	name        string
-	workspaceID string
-	userID      string
+	// msgType     MessageType
+	conn *websocket.Conn
+	name string
+	// workspaceID string
+	userID string
 }
 
 type Message struct {
@@ -158,16 +158,16 @@ func Hub() {
 	}
 }
 
-func sendRoomToken(conn *websocket.Conn, token string) error {
-	err := conn.WriteJSON(map[string]string{
-		"token": token,
-	})
-	if err != nil {
-		log.Printf("Error sending token to user: %v\n", err)
-		return err
-	}
-	return nil
-}
+// func sendRoomToken(conn *websocket.Conn, token string) error {
+// 	err := conn.WriteJSON(map[string]string{
+// 		"token": token,
+// 	})
+// 	if err != nil {
+// 		log.Printf("Error sending token to user: %v\n", err)
+// 		return err
+// 	}
+// 	return nil
+// }
 
 func sendPrivateMessage(userID string, msg Message) error {
 	mu.RLock()

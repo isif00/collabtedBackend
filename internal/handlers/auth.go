@@ -145,7 +145,10 @@ func (h *authHandler) Me(c echo.Context) error {
 
 	claims := c.Get("user").(*types.Claims)
 
-	utils.FetchAndEncodeImageToBase64(claims.ProfilePicture)
+	_, err := utils.FetchAndEncodeImageToBase64(claims.ProfilePicture)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 
 	return c.JSON(http.StatusOK, claims)
 }

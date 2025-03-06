@@ -21,10 +21,10 @@ type OnlineEvent struct {
 }
 
 var (
-	online        = make(chan User)
-	disconnected  = make(chan User)
+	online        = make(chan *User)
+	disconnected  = make(chan *User)
 	workspaceLock sync.Mutex
-	workspaces    = make(map[string][]User)
+	workspaces    = make(map[string][]*User)
 )
 
 // BroadcastEvent sends an event to all users in a workspace.
@@ -38,7 +38,7 @@ func broadcastEvent(workspaceID string, event OnlineEvent) {
 	}
 
 	for _, user := range users {
-		go func(u User) {
+		go func(u *User) {
 			u.WriteMu.Lock()
 			defer u.WriteMu.Unlock()
 
@@ -99,7 +99,7 @@ func WatchDisconnect() {
 		users, ok := workspaces[user.WorkspaceID]
 		if ok && len(users) > 0 {
 			// Create slice without capacity restriction
-			updatedUsers := make([]User, 0)
+			updatedUsers := make([]*User, 0)
 			for _, u := range users {
 				if u.UserID != user.UserID {
 					updatedUsers = append(updatedUsers, u)

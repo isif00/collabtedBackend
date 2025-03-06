@@ -56,7 +56,7 @@ func (ws WsChatHandler) Connections(c echo.Context) error {
 
 	// Get workspace ID and create user
 	workspaceID := c.QueryParam("workspaceID") // Fixed typo
-	user := User{
+	user := &User{
 		UserID:      claims.ID,
 		WorkspaceID: workspaceID,
 		Conn:        conn,
@@ -73,7 +73,10 @@ func (ws WsChatHandler) Connections(c echo.Context) error {
 	go func() {
 		defer conn.Close()
 		conn.SetPongHandler(func(string) error {
-			conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+			err := conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+			if err != nil {
+				return err
+			}
 			return nil
 		})
 
@@ -169,7 +172,6 @@ func (ws WsChatHandler) Chat(c echo.Context) error {
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
-			fmt.Println("channel", channel.Participants)
 			data.Recievers = channel.Participants()
 			fmt.Println("the recievers are", data.Recievers)
 		}

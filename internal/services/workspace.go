@@ -359,7 +359,7 @@ func (s *WorkspaceService) KickUser(workspaceId string, userId string) (*db.Work
 		return nil, err
 	}
 	if userwrk.Workspace().OwnerID == userId {
-		return nil, errors.New("Can't kick the owner of the workspace")
+		return nil, errors.New("can't kick the owner of the workspace")
 	}
 	_, err = prisma.Client.UserWorkspace.FindUnique(
 		db.UserWorkspace.ID.Equals(userwrk.ID),

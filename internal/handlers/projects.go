@@ -45,36 +45,49 @@ func (h *projectHandler) CreateProject(c echo.Context) error {
 	}
 
 	project, err := h.srv.CreateProject(payload)
-
-	h.statusService.CreateStatus(
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	_, err = h.statusService.CreateStatus(
 		types.StatusD{
 			ProjectID: project.ID,
 			Name:      "To Do",
 			Color:     "#3584e4",
 		},
 	)
-	h.statusService.CreateStatus(
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	_, err = h.statusService.CreateStatus(
 		types.StatusD{
 			ProjectID: project.ID,
 			Name:      "In Progress",
 			Color:     "#f6d32d",
 		},
 	)
-	h.statusService.CreateStatus(
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	_, err = h.statusService.CreateStatus(
 		types.StatusD{
 			ProjectID: project.ID,
 			Name:      "Blocked",
 			Color:     "#e01b24",
 		},
 	)
-	h.statusService.CreateStatus(
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	_, err = h.statusService.CreateStatus(
 		types.StatusD{
 			ProjectID: project.ID,
 			Name:      "Done",
 			Color:     "#33d17a",
 		},
 	)
-
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
