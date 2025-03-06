@@ -1,0 +1,233 @@
+basePath: /api/v1
+definitions:
+  types.InvitationD:
+    properties:
+      email:
+        type: string
+      status:
+        type: string
+      token:
+        type: string
+      workspaceId:
+        type: string
+    type: object
+  types.LoginPayload:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  types.RegisterPayload:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      profile_picture:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  types.WorkspaceD:
+    properties:
+      owner_id:
+        type: string
+      workspace_name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: REST Api of the CollabTED project.
+  title: CollabTED
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/types.LoginPayload'
+      produces:
+      - application/json
+      responses: {}
+      summary: Login endpoint
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Registration details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/types.RegisterPayload'
+      produces:
+      - application/json
+      responses: {}
+      summary: Registration endpoint
+      tags:
+      - auth
+  /auth/verify:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: userid
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: otp
+        in: query
+        name: otp
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Verification endpoint
+      tags:
+      - auth
+  /invitations:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Invitation details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/types.InvitationD'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.InvitationD'
+      security:
+      - BearerAuth: []
+      summary: Create an invitation
+      tags:
+      - workspace
+  /oauth/facebook/callback:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: The OAuth2 authorization code
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Handles Facebook OAuth2 callback
+      tags:
+      - auth
+  /oauth/facebook/login:
+    get:
+      produces:
+      - application/json
+      responses: {}
+      summary: Initiates Facebook OAuth2 login
+      tags:
+      - auth
+  /oauth/google/callback:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: The OAuth2 authorization code
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Handles Google OAuth2 callback
+      tags:
+      - auth
+  /oauth/google/login:
+    get:
+      produces:
+      - application/json
+      responses: {}
+      summary: Initiates Google OAuth2 login
+      tags:
+      - auth
+  /workspaces:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/types.WorkspaceD'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List workspaces for the authenticated user
+      tags:
+      - workspace
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Workspace details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/types.WorkspaceD'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/types.WorkspaceD'
+      summary: Create a new workspace
+      tags:
+      - workspace
+swagger: "2.0"

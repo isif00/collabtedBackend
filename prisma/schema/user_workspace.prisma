@@ -1,0 +1,27 @@
+model UserWorkspace {
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String       @db.ObjectId
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId  String       @db.ObjectId
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  role         UserRole
+  joinedAt     DateTime     @default(now())
+  channelIds   String[]     @db.ObjectId
+  Channel      Channel[]    @relation(fields: [channelIds], references: [id])
+  leadProjects Project[]
+  projectsIds  String[]     @db.ObjectId
+  projects     Project[]    @relation(fields: [projectsIds], references: [id], "ProjectAssignees")
+  tasksIds     String[]     @db.ObjectId
+  tasks        Task[]       @relation(fields: [tasksIds], references: [id])
+  Messages     Message[]
+  eventIds     String[]     @db.ObjectId
+  Event        Event[]      @relation(fields: [eventIds], references: [id])
+  LiveBoard    LiveBoard?   @relation(fields: [liveBoardId], references: [id])
+  liveBoardId  String?      @db.ObjectId
+}
+
+enum UserRole {
+  ADMIN // Full control over the workspace (can invite, manage, and remove users)
+  MANAGER // Can manage resources, but cannot invite or remove users
+  MEMBER // Can view and interact with resources, but cannot manage them
+}

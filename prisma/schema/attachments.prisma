@@ -1,0 +1,8 @@
+model Attachment {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  channelID String        @db.ObjectId
+  channel   Channel       @relation(fields: [channelID], references: [id], onDelete: Cascade)
+  userID    String        @db.ObjectId
+  file      String
+  title     String
+}

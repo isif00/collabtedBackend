@@ -1,0 +1,19 @@
+model Message {
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
+  content         String
+  channelID       String         @db.ObjectId
+  senderID        String         @db.ObjectId
+  channel         Channel        @relation(fields: [channelID], references: [id], onDelete: Cascade)
+  sender          User           @relation(fields: [senderID], references: [id])
+  UserWorkspace   UserWorkspace? @relation(fields: [userWorkspaceId], references: [id])
+  userWorkspaceId String?        @db.ObjectId
+  createdAt       DateTime       @default(now())
+  isPined         Boolean        @default(false)
+
+  isReply         Boolean @default(false)
+  replyToUserName String
+  replyToMessage  String
+
+  attachmentLink  String
+  attachmentTitle String
+}
