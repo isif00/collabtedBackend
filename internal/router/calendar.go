@@ -11,4 +11,6 @@ func CalendarRoutes(e *echo.Group) {
 	events := e.Group("/events", middlewares.AuthMiddleware)
 	events.POST("/create", h.CreateEvent)
 	events.GET("/list/:workspaceId", h.ListEvents)
+	events.DELETE("/:eventId", h.DeleteEvent)
+	events.PUT("/:eventId", h.EditEvent)
 }
