@@ -55,7 +55,7 @@ func (ws WsChatHandler) Connections(c echo.Context) error {
 	}
 
 	// Get workspace ID and create user
-	workspaceID := c.QueryParam("workspaceID") // Fixed typo
+	workspaceID := c.QueryParam("workspaceID")
 	user := &User{
 		UserID:      claims.ID,
 		WorkspaceID: workspaceID,
@@ -86,7 +86,6 @@ func (ws WsChatHandler) Connections(c echo.Context) error {
 				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
 					log.Printf("connection closed unexpectedly: %v", err)
 				}
-				// Trigger disconnect
 				disconnected <- user
 				return
 			}
@@ -97,14 +96,12 @@ func (ws WsChatHandler) Connections(c echo.Context) error {
 	go func() {
 		ticker := time.NewTicker(25 * time.Second)
 		defer ticker.Stop()
-
 		for {
 			select {
 			case <-ticker.C:
 				user.WriteMu.Lock()
 				err := conn.WriteControl(websocket.PingMessage, nil, time.Now().Add(5*time.Second))
 				user.WriteMu.Unlock()
-
 				if err != nil {
 					log.Println("ping failed:", err)
 					return
@@ -115,7 +112,6 @@ func (ws WsChatHandler) Connections(c echo.Context) error {
 		}
 	}()
 
-	// Wait until connection is closed
 	<-done
 	return nil
 }
@@ -126,12 +122,11 @@ func (ws WsChatHandler) Chat(c echo.Context) error {
 		WriteBufferSize: writeBufferSize,
 		CheckOrigin:     func(r *http.Request) bool { return true },
 	}
+
 	cookie, err := c.Cookie("jwt")
-	fmt.Println("cookie", cookie)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-
 	if cookie.Value == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "token is required")
 	}
@@ -143,29 +138,70 @@ func (ws WsChatHandler) Chat(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	claims := token.Claims.(*types.Claims)
+
 	conn, err := upgrader.Upgrade(c.Response().Writer, c.Request(), nil)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	defer conn.Close()
+
+	// Set up ping/pong handlers
+	conn.SetPongHandler(func(appData string) error {
+		err := conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
+	done := make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(25 * time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				if err := conn.WriteControl(websocket.PingMessage, nil, time.Now().Add(5*time.Second)); err != nil {
+					log.Println("Ping failed:", err)
+					return
+				}
+			case <-done:
+				return
+			}
+		}
+	}()
+
+	conn.SetCloseHandler(func(code int, text string) error {
+		close(done)
+		closing <- claims.ID
+		return nil
+	})
+
 	connection <- Connection{
 		conn:   conn,
 		name:   claims.Name,
 		userID: claims.ID,
 	}
-	conn.SetCloseHandler(func(code int, text string) error {
-		fmt.Println("disconnected")
-		closing <- claims.ID
-		return nil
-	})
+
 	for {
 		var data Message
 		err := conn.ReadJSON(&data)
-		logger.LogDebug().Msg(fmt.Sprintf("Received message: %+v", data))
-		fmt.Println("recieved message", data)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
+
+		// Handle ping messages
+		if data.Type == "ping" {
+			data.Type = "pong"
+			if err := conn.WriteJSON(data); err != nil {
+				log.Println("Failed to send pong:", err)
+			}
+			continue
+		}
+
+		logger.LogDebug().Msg(fmt.Sprintf("Received message: %+v", data))
+		fmt.Println("received message", data)
+
 		var channel *db.ChannelModel
 		if data.ChannelID != "" {
 			channel, err = ws.srv.GetChannelById(data.ChannelID)
@@ -173,7 +209,7 @@ func (ws WsChatHandler) Chat(c echo.Context) error {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
 			data.Recievers = channel.Participants()
-			fmt.Println("the recievers are", data.Recievers)
+			fmt.Println("the receivers are", data.Recievers)
 		}
 		data.SenderID = claims.ID
 		messages <- data

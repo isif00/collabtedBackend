@@ -112,11 +112,14 @@ func (h *oauthHandler) handleCallback(c echo.Context, provider string) error {
 
 		userID = newUser.ID
 		profilePicture = result.SecureURL
+		email = newUser.Email
+		name = newUser.Name
 
 		err = h.srv.ActivateUser(userID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
+
 	} else {
 		userID = existingUser.ID
 		profilePicture = existingUser.ProfilePicture

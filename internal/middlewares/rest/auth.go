@@ -20,7 +20,7 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		if tokenString == "" {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Missing token")
 		}
-		token, err := jwt.ParseWithClaims(tokenString, &types.Claims{}, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(tokenString, &types.Claims{}, func(token *jwt.Token) (any, error) {
 			return []byte(config.JWT_SECRET), nil
 		})
 		if err != nil {
