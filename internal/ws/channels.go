@@ -199,6 +199,15 @@ func (ws WsChatHandler) Chat(c echo.Context) error {
 			continue
 		}
 
+		if data.Type == "delete" {
+			channel, err := ws.srv.GetChannelById(data.ChannelID)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			data.Recievers = channel.Participants()
+			messages <- data
+		}
+
 		logger.LogDebug().Msg(fmt.Sprintf("Received message: %+v", data))
 		fmt.Println("received message", data)
 

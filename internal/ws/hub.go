@@ -214,7 +214,18 @@ func broadcastMessageToChannel(msg Message) error {
 		if !ok {
 			continue
 		}
-		err := con.conn.WriteJSON(savedMsg)
+		err := con.conn.WriteJSON(map[string]any{
+			"type":            string(msg.Type),
+			"id":              savedMsg.ID,
+			"content":         savedMsg.Content,
+			"senderID":        savedMsg.SenderID,
+			"channelID":       savedMsg.ChannelID,
+			"isReply":         savedMsg.IsReply,
+			"replyToMessage":  savedMsg.ReplyToMessage,
+			"replyToUserName": savedMsg.ReplyToUserName,
+			"attachmentTitle": savedMsg.AttachmentTitle,
+			"attachmentLink":  savedMsg.AttachmentLink,
+		})
 		if err != nil {
 			log.Printf("Error sending message to user %s: %v\n", user.UserID, err)
 		}
@@ -241,12 +252,13 @@ func broadcastDeleteMessage(msg Message) error {
 		if !ok {
 			continue
 		}
-		err := con.conn.WriteJSON(msg)
+		err := con.conn.WriteJSON(map[string]any{
+			"type":      MessageTypeDelete,
+			"id":        msg.ID,
+			"channelID": msg.ChannelID,
+		})
 		if err != nil {
 			log.Printf("Error sending delete message to user %s: %v\n", user.UserID, err)
-		}
-		if err != nil {
-			log.Println(err)
 		}
 	}
 
