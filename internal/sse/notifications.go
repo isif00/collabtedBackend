@@ -29,6 +29,8 @@ func (n *Notifier) NotificationHandler(c echo.Context) error {
 	c.Response().Header().Set("Cache-Control", "no-cache")
 	c.Response().Header().Set("Connection", "keep-alive")
 	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+	c.Response().Header().Del("Content-Length")
+	c.Response().Flush()	
 
 	id := c.QueryParam("userID")
 

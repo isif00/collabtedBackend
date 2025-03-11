@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"os"
+	"time"
 
 	"github.com/CollabTED/CollabTed-Backend/pkg/logger"
 	"github.com/redis/go-redis/v9"
@@ -18,6 +19,9 @@ func Connect() {
 		Password: os.Getenv("REDIS_PASSWORD"),
 		Username: os.Getenv("REDIS_USERNAME"),
 
+		DialTimeout:  5 * time.Second,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
 		// #nosec G402
 		TLSConfig: &tls.Config{}, // could be changed to TLSConfig: &tls.Config{InsecureSkipVerify: true} when working on local redis instnace
 	})
