@@ -40,6 +40,7 @@ type Connection struct {
 }
 
 type Message struct {
+	ClientID    string      `json:"clientID"`
 	ID          string      `json:"id"`
 	Type        MessageType `json:"type"`
 	SenderID    string      `json:"senderID"`
@@ -215,6 +216,7 @@ func broadcastMessageToChannel(msg Message) error {
 			continue
 		}
 		err := con.conn.WriteJSON(map[string]any{
+			"clientID":        msg.ClientID,
 			"type":            string(msg.Type),
 			"id":              savedMsg.ID,
 			"content":         savedMsg.Content,

@@ -131,7 +131,7 @@ func (ws WsChatHandler) Chat(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "token is required")
 	}
 
-	token, err := jwt.ParseWithClaims(cookie.Value, &types.Claims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(cookie.Value, &types.Claims{}, func(token *jwt.Token) (any, error) {
 		return []byte(config.JWT_SECRET), nil
 	})
 	if err != nil {
