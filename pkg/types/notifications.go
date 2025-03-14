@@ -10,10 +10,11 @@ const (
 )
 
 type PingNotification struct {
-	Type    NotifType `json:"type"`
-	Content string    `json:"content"`
-	Sender  string    `json:"senderName"`
-	Channel string    `json:"channelID"`
+	Type     NotifType `json:"type"`
+	Content  string    `json:"content"`
+	Sender   string    `json:"senderName"`
+	Channel  string    `json:"channelID"`
+	SenderID string    `json:"senderID"`
 }
 
 type CallNotification struct {

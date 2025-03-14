@@ -236,6 +236,7 @@ func broadcastMessageToChannel(msg Message) error {
 			Sender:  con.name,
 			Content: savedMsg.Content,
 			Channel: savedMsg.ChannelID,
+			SenderID: savedMsg.SenderID,
 		})
 		if err != nil {
 			log.Println(err)
