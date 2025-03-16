@@ -39,4 +39,5 @@ func SetRoutes(e *echo.Echo) {
 	TasksRoutes(v1)
 	LiveBoardRoutes(v1)
 	ProfileRoutes(v1)
+	AppStateRouter(v1)
 }

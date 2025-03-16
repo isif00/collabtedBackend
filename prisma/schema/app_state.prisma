@@ -1,0 +1,6 @@
+model AppState {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userWorkspaceId String   @db.ObjectId @unique
+  missedCalls     String[] @db.ObjectId
+  unreadChannels  String[] @db.ObjectId
+}

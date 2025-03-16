@@ -9,3 +9,8 @@ model Channel {
   workspace       Workspace       @relation(fields: [workspaceId], references: [id])
   attachments     Attachment[]
 }
+
+model UserUnreadChannel {
+  userId    String   @id @map("_id") @db.ObjectId
+  channels  String[] @db.ObjectId
+}

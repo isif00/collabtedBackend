@@ -18,14 +18,16 @@ import (
 )
 
 type WorkspaceService struct {
-	sender   *mail.EmailVerifier
-	boardSrv *BoardService
+	sender      *mail.EmailVerifier
+	boardSrv    *BoardService
+	appStateSrv *AppStateService
 }
 
 func NewWorkspaceService() *WorkspaceService {
 	return &WorkspaceService{
-		sender:   mail.NewVerifier(),
-		boardSrv: NewBoardService(),
+		sender:      mail.NewVerifier(),
+		boardSrv:    NewBoardService(),
+		appStateSrv: NewAppStateService(),
 	}
 }
 
@@ -205,7 +207,7 @@ func (s *WorkspaceService) AcceptInvitation(userID, token string) (string, error
 		}
 	}
 
-	_, err = prisma.Client.UserWorkspace.CreateOne(
+	userWorkspace, err := prisma.Client.UserWorkspace.CreateOne(
 		db.UserWorkspace.User.Link(
 			db.User.ID.Equals(userID),
 		),
@@ -218,6 +220,12 @@ func (s *WorkspaceService) AcceptInvitation(userID, token string) (string, error
 
 	if err != nil {
 		return "", fmt.Errorf("failed to join workspace: %v", err)
+	}
+
+	// create AppState
+	_, err = s.appStateSrv.CreateAppState(userWorkspace.ID)
+	if err != nil {
+		return "", fmt.Errorf("failed to create app state: %v", err)
 	}
 
 	_, err = prisma.Client.Invitation.FindUnique(

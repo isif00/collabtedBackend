@@ -232,10 +232,10 @@ func broadcastMessageToChannel(msg Message) error {
 			log.Printf("Error sending message to user %s: %v\n", user.UserID, err)
 		}
 		err = n.NotifyPing(user.UserID, types.PingNotification{
-			Type:    types.MESSAGE_NOTIFICATION,
-			Sender:  con.name,
-			Content: savedMsg.Content,
-			Channel: savedMsg.ChannelID,
+			Type:     types.MESSAGE_NOTIFICATION,
+			Sender:   con.name,
+			Content:  savedMsg.Content,
+			Channel:  savedMsg.ChannelID,
 			SenderID: savedMsg.SenderID,
 		})
 		if err != nil {

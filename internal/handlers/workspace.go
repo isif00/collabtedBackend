@@ -15,18 +15,20 @@ import (
 )
 
 type workspaceHandler struct {
-	srv      services.WorkspaceService
-	csrv     services.ChannelService
-	boardSrv services.BoardService
-	notifier *sse.Notifier
+	srv         services.WorkspaceService
+	csrv        services.ChannelService
+	boardSrv    services.BoardService
+	appStateSrv services.AppStateService
+	notifier    *sse.Notifier
 }
 
 func NewWorkspaceHandler() *workspaceHandler {
 	return &workspaceHandler{
-		srv:      *services.NewWorkspaceService(),
-		csrv:     *services.NewChannelService(),
-		boardSrv: *services.NewBoardService(),
-		notifier: sse.NewNotifier(),
+		srv:         *services.NewWorkspaceService(),
+		csrv:        *services.NewChannelService(),
+		boardSrv:    *services.NewBoardService(),
+		appStateSrv: *services.NewAppStateService(),
+		notifier:    sse.NewNotifier(),
 	}
 }
 
@@ -53,7 +55,7 @@ func (h *workspaceHandler) CreateWorkspace(c echo.Context) error {
 
 	claims := c.Get("user").(*types.Claims)
 
-	_, err = prisma.Client.UserWorkspace.CreateOne(
+	userWorkspaceUser, err := prisma.Client.UserWorkspace.CreateOne(
 		db.UserWorkspace.User.Link(
 			db.User.ID.Equals(claims.ID),
 		),
@@ -63,9 +65,14 @@ func (h *workspaceHandler) CreateWorkspace(c echo.Context) error {
 		db.UserWorkspace.Role.Set(db.UserRoleAdmin),
 		db.UserWorkspace.JoinedAt.Set(time.Now()),
 	).Exec(context.Background())
-
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Failed to associate user with workspace: "+err.Error())
+	}
+
+	// create app state
+	_, err = h.appStateSrv.CreateAppState(userWorkspaceUser.ID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Failed to create app state: "+err.Error())
 	}
 
 	return c.JSON(http.StatusCreated, workspace)
