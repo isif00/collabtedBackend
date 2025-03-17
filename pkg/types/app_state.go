@@ -7,6 +7,6 @@ type AppState struct {
 }
 
 type AppStateUpdateRequest struct {
-    Action string `json:"action"`
-    Value  string `json:"value"`
+	Action string `json:"action"`
+	Value  string `json:"value"`
 }

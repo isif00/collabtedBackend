@@ -1,0 +1,11 @@
+model UserRequest {
+    id      String      @id @default(auto()) @map("_id") @db.ObjectId
+    type    RequestType
+    email   String
+    request String
+}
+
+enum RequestType {
+    EXTENSION
+    BUG
+}
