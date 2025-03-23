@@ -8,4 +8,5 @@ model UserRequest {
 enum RequestType {
     EXTENSION
     BUG
+    EMAIL
 }

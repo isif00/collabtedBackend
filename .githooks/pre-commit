@@ -7,4 +7,11 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+echo "building..."
+go build -o main ./cmd/server/main.go
+if [ $? -ne 0 ]; then
+  echo "go build failed. Please fix build issues."
+  exit 1
+fi
+
 echo "Pre-commit checks passed."

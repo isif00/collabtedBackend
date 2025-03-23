@@ -8,7 +8,7 @@ import (
 
 func UserRequestRouter(e *echo.Group) {
 	h := handlers.NewUserRequestHandler()
-	UserRequest := e.Group("/user-requests", middlewares.AuthMiddleware)
-	UserRequest.GET("/", h.GetRequests)
+	UserRequest := e.Group("/user-requests")
+	UserRequest.GET("/", h.GetRequests, middlewares.AuthMiddleware)
 	UserRequest.POST("/", h.SaveRequest)
 }

@@ -1,6 +1,8 @@
 package server
 
 import (
+	"strings"
+
 	"github.com/CollabTED/CollabTed-Backend/config"
 	middlewares "github.com/CollabTED/CollabTed-Backend/internal/middlewares/rest"
 	"github.com/CollabTED/CollabTed-Backend/internal/router"
@@ -27,7 +29,7 @@ func (s *Server) Setup(e *echo.Echo) {
 
 	// CORS configuration
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{config.ALLOWED_ORIGINS},
+		AllowOrigins:     strings.Split(config.ALLOWED_ORIGINS, ","),
 		AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.PATCH, echo.OPTIONS},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 		AllowCredentials: true,
