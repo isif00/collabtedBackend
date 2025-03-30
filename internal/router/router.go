@@ -41,4 +41,5 @@ func SetRoutes(e *echo.Echo) {
 	ProfileRoutes(v1)
 	AppStateRouter(v1)
 	UserRequestRouter(v1)
+	SubscriptionRoutes(v1)
 }

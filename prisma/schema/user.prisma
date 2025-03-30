@@ -9,4 +9,31 @@ model User {
   userWorkspace  UserWorkspace[]
   workspace      Workspace[]
   Message        Message[]
+
+  subscription_plan       PlanType               @default(PERSONAL)
+  subscription_status     SubscriptionStatusType @default(INACTIVE)
+  subscription_start_date DateTime?
+  subscription_end_date   DateTime?
+  last_payment_date       DateTime?
+  last_payment_method     String?
+  last_payment_status     String?
+  billing_cycle           BillingCycleType       @default(MONTHLY)
+  next_billing_date       DateTime?
+}
+
+enum PlanType {
+  PERSONAL
+  COLLABORATE
+  COMPANY
+}
+
+enum SubscriptionStatusType {
+  ACTIVE
+  INACTIVE
+  DISABLED
+}
+
+enum BillingCycleType {
+  MONTHLY
+  YEARLY
 }
