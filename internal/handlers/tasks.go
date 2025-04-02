@@ -53,18 +53,18 @@ func (h *TaskHandler) ChangeTaskStatus(c echo.Context) error {
 // GetTaskByIdHandler retrieves a task by ID, ensuring the user is a member of the project.
 func (h *TaskHandler) GetTaskByIdHandler(c echo.Context) error {
 	taskID := c.Param("id")
-	claims := c.Get("user").(*types.Claims) // Assume userId is extracted from JWT middleware
-	workspaceId := c.QueryParam("workspaceId")
+	// claims := c.Get("user").(*types.Claims) // Assume userId is extracted from JWT middleware
+	// workspaceId := c.QueryParam("workspaceId")
 
-	// Ensure the user is a member of the project
-	isMember, err := h.ProjectService.IsUserMemberOfProject(claims.ID, workspaceId, taskID)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-	}
+	// // Ensure the user is a member of the project
+	// isMember, err := h.ProjectService.IsUserMemberOfProject(claims.ID, workspaceId, taskID)
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	// }
 
-	if !isMember {
-		return c.JSON(http.StatusForbidden, map[string]string{"error": "You are not a member of this project"})
-	}
+	// if !isMember {
+	// 	return c.JSON(http.StatusForbidden, map[string]string{"error": "You are not a member of this project"})
+	// }
 
 	// Retrieve the task
 	task, err := h.TaskService.GetTaskById(taskID)
@@ -78,18 +78,18 @@ func (h *TaskHandler) GetTaskByIdHandler(c echo.Context) error {
 // ListTasksByProjectHandler lists tasks in a project, ensuring the user is a member of the project.
 func (h *TaskHandler) ListTasksByProjectHandler(c echo.Context) error {
 	projectID := c.Param("projectId")
-	claims := c.Get("user").(*types.Claims) // Assume userId is extracted from JWT middleware
-	workspaceId := c.Param("workspaceId")
+	// claims := c.Get("user").(*types.Claims) // Assume userId is extracted from JWT middleware
+	// workspaceId := c.Param("workspaceId")
 
-	// Ensure the user is a member of the project
-	isMember, err := h.ProjectService.IsUserMemberOfProject(claims.ID, workspaceId, projectID)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-	}
+	// // Ensure the user is a member of the project
+	// isMember, err := h.ProjectService.IsUserMemberOfProject(claims.ID, workspaceId, projectID)
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	// }
 
-	if !isMember {
-		return c.JSON(http.StatusForbidden, map[string]string{"error": "You are not a member of this project"})
-	}
+	// if !isMember {
+	// 	return c.JSON(http.StatusForbidden, map[string]string{"error": "You are not a member of this project"})
+	// }
 
 	// List tasks in the project
 	tasks, err := h.TaskService.ListTasksByProject(projectID)

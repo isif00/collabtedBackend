@@ -63,10 +63,37 @@ func (s *AuthService) CreateUser(name string, email string, password string, pro
 	}
 
 	// Create Personal Workspace
-	_, err = NewWorkspaceService().CreateWorkspace(types.WorkspaceD{
+	personalWorkspace, err := NewWorkspaceService().CreateWorkspace(types.WorkspaceD{
 		Name:    "Personal",
 		OwnerID: result.ID,
 	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Create Personal UserWorkspace
+	personalUserWorkspace, err := prisma.Client.UserWorkspace.CreateOne(
+		db.UserWorkspace.User.Link(
+			db.User.ID.Equals(result.ID),
+		),
+		db.UserWorkspace.Workspace.Link(
+			db.Workspace.ID.Equals(personalWorkspace.ID),
+		),
+		db.UserWorkspace.Role.Set(db.UserRoleAdmin),
+		db.UserWorkspace.JoinedAt.Set(time.Now()),
+	).Exec(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	// Create Personal AppState
+	_, err = prisma.Client.AppState.CreateOne(
+		db.AppState.UserWorkspaceID.Set(personalUserWorkspace.ID),
+		db.AppState.UnreadChannels.Set([]string{}),
+	).Exec(
+		context.Background(),
+	)
 	if err != nil {
 		return nil, err
 	}
