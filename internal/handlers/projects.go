@@ -73,17 +73,6 @@ func (h *projectHandler) CreateProject(c echo.Context) error {
 	_, err = h.statusService.CreateStatus(
 		types.StatusD{
 			ProjectID: project.ID,
-			Name:      "Blocked",
-			Color:     "#e01b24",
-		},
-	)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	_, err = h.statusService.CreateStatus(
-		types.StatusD{
-			ProjectID: project.ID,
 			Name:      "Done",
 			Color:     "#33d17a",
 		},

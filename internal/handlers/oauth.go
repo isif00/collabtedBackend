@@ -132,8 +132,8 @@ func (h *oauthHandler) handleCallback(c echo.Context, provider string) error {
 	if err := utils.SetJWTAsCookie(c.Response().Writer, userID, email, name, profilePicture); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Unable to set JWT cookie")
 	}
-
-	redirectURL := os.Getenv("HOST_URL")
+	
+	redirectURL := os.Getenv("HOST_URL") + "/onboard"
 	return c.Redirect(http.StatusFound, redirectURL)
 }
 
