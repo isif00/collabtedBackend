@@ -411,3 +411,5 @@ func (s *WorkspaceService) DeleteInvitation(invitationId string) error {
 	}
 	return nil
 }
+
+// MONGO_URI_DEV="mongodb+srv://collabted5:collabted2024@cluster0.myzjn.mongodb.net/dev?retryWrites=true&w=majority&appName=Cluster0"
