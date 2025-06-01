@@ -100,6 +100,31 @@ func (h *TaskHandler) ListTasksByProjectHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, tasks)
 }
 
+func (h *TaskHandler) ListTasksCountByProjectHandler(c echo.Context) error {
+	projectID := c.Param("projectId")
+	// claims := c.Get("user").(*types.Claims) // Assume userId is extracted from JWT middleware
+	// workspaceId := c.Param("workspaceId")
+
+	// // Ensure the user is a member of the project
+	// isMember, err := h.ProjectService.IsUserMemberOfProject(claims.ID, workspaceId, projectID)
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	// }
+
+	// if !isMember {
+	// 	return c.JSON(http.StatusForbidden, map[string]string{"error": "You are not a member of this project"})
+	// }
+
+	// List tasks in the project
+	tasks, err := h.TaskService.ListTasksByProject(projectID)
+	tasksCount := len(tasks)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, tasksCount)
+}
+
 // Update Task Description
 func (h *TaskHandler) UpdateDescription(c echo.Context) error {
 	var taskId = c.Param("taskId")

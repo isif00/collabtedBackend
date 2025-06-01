@@ -4,15 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 
 	"github.com/CollabTED/CollabTed-Backend/internal/services"
-	"github.com/CollabTED/CollabTed-Backend/pkg/cloudinary"
-	"github.com/CollabTED/CollabTed-Backend/pkg/logger"
 	"github.com/CollabTED/CollabTed-Backend/pkg/types"
 	"github.com/CollabTED/CollabTed-Backend/pkg/utils"
-	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
 	"github.com/labstack/echo/v4"
@@ -71,7 +72,14 @@ func (h *oauthHandler) handleCallback(c echo.Context, provider string) error {
 	}
 	defer userInfo.Body.Close()
 
-	if err := json.NewDecoder(userInfo.Body).Decode(&user); err != nil {
+	bodyBytes, err := io.ReadAll(userInfo.Body)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to read user info body: "+err.Error())
+	}
+
+	fmt.Println("Google user info response:", string(bodyBytes)) // 👈 This logs the raw JSON response
+
+	if err := json.Unmarshal(bodyBytes, &user); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to decode user info: "+err.Error())
 	}
 
@@ -84,34 +92,20 @@ func (h *oauthHandler) handleCallback(c echo.Context, provider string) error {
 	var userID, email, name, profilePicture string
 
 	if existingUser == nil {
-		// Fetch the image from the provider's URL
-		resp, err := http.Get(user.ProfilePicture)
-		if err != nil {
-			logger.Logger.Err(err).Msg("Failed to fetch profile image")
-			return echo.NewHTTPError(http.StatusInternalServerError, "failed to fetch profile image")
-		}
-		defer resp.Body.Close()
 
-		// Upload to Cloudinary
-		uploadParams := uploader.UploadParams{
-			Folder:   "profile-pictures",
-			PublicID: fmt.Sprintf("user-%s", user.Email), // Optional unique identifier
-		}
-
-		result, err := cloudinary.GetUploader().Upload(c.Request().Context(), resp.Body, uploadParams)
-		if err != nil {
-			logger.Logger.Err(err).Msg("Failed to upload profile picture to Cloudinary")
-			return echo.NewHTTPError(http.StatusInternalServerError, "failed to upload profile picture")
-		}
+		fallbackAvatarURL := fmt.Sprintf(
+			"https://ui-avatars.com/api/?name=%s",
+			url.QueryEscape(strings.ReplaceAll(user.Name, " ", "")),
+		)
 
 		// Create user with Cloudinary URL
-		newUser, err := h.srv.CreateUser(user.Name, user.Email, "", result.SecureURL, true)
+		newUser, err := h.srv.CreateUser(user.Name, user.Email, "", fallbackAvatarURL, true)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, "failed to create user: "+err.Error())
 		}
 
 		userID = newUser.ID
-		profilePicture = result.SecureURL
+		profilePicture = fallbackAvatarURL
 		email = newUser.Email
 		name = newUser.Name
 
@@ -128,11 +122,11 @@ func (h *oauthHandler) handleCallback(c echo.Context, provider string) error {
 	}
 
 	// Generate JWT token with Cloudinary URL
-	logger.Logger.Info().Msgf("User ID: %s, Email: %s, Name: %s, Profile Picture: %s", userID, email, name, profilePicture)
+	log.Info().Msgf("User ID: %s, Email: %s, Name: %s, Profile Picture: %s", userID, email, name, profilePicture)
 	if err := utils.SetJWTAsCookie(c.Response().Writer, userID, email, name, profilePicture); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Unable to set JWT cookie")
 	}
-	
+
 	redirectURL := os.Getenv("HOST_URL") + "/onboard"
 	return c.Redirect(http.StatusFound, redirectURL)
 }
